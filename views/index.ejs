@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Browser</title>
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 8px 0;
+        }
+        a {
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: none;
+        }
+        #title {
+            color:black;
+        }
+    </style>
+</head>
+<body>
+    <h1><a id="title" href="/"> KnowYourIG </a></h1>
+    <ul>
+        <% items.forEach(function(item) { %>
+            <li>
+                <!-- Link to each JSON file viewer -->
+                <a href="<%= item.route %>"><%= item.name %></a>
+            </li>
+        <% }); %>
+    </ul>
+</body>
+</html>

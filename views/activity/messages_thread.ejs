@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages for <%= user %></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>Messages for <%= user %></h1>
+
+    <% if (messages && messages.length > 0) { %>
+        <% messages.forEach(function(message) { %>
+            <div class="message">
+                <p><strong><%= message.sender_name %>:</strong> <%= message.content || 'No content available' %></p>
+                <p class="timestamp"><%= new Date(message.timestamp_ms).toLocaleString() %></p>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <p>No messages found.</p>
+    <% } %>
+
+    <a href="/messages">Back to users</a>
+</body>
+</html>

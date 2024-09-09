@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggested accounts seen</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>author</th>
+                <th>time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% suggestedAccountsList.forEach(function(account) { %>
+                <tr>
+                    <td><a href="https://www.instagram.com/<%= account.username %>" target="_blank"><%= account.username %></a></td>
+
+                    <td><%= account.time %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>

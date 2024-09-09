@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Activity</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 25%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Login Activity</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Device</th>
+                <th>Location (IP Address)</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% loginActivityList.forEach(function(activity) { %>
+                <tr>
+                    <td><%= activity.device %></td>
+                    <td><%= activity.location %></td>
+                    <td><%= activity.time %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>

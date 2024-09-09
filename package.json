@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "d3.js": "^0.0.2-security",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "ipinfo": "^1.5.1",
+    "node": "^22.8.0"
+  },
+  "name": "knowyourig",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

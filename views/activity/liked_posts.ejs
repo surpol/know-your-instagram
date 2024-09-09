@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liked Posts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 20px;
+        }
+        h2 {
+            color: #444;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin: 5px 0;
+        }
+        a {
+            color: #1a0dab;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Liked Posts</h1>
+
+    <% Object.keys(organizedLikes).forEach(function(title) { %>
+        <h2><%= title %></h2>
+        <ul>
+            <% organizedLikes[title].forEach(function(href) { %>
+                <li><a href="<%= href %>" target="_blank"><%= href %></a></li>
+            <% }); %>
+        </ul>
+    <% }); %>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts Viewed</title>
+</head>
+<body>
+    
+    <p><strong>Timespan:</strong> From <%= postTimespan.start %> to <%= postTimespan.end %></p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>author</th>
+                <th>count</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% Object.keys(postCounts).forEach(function(author) { %>
+                <tr>
+                    <td><a href="https://www.instagram.com/<%= author %>" target="_blank"><%= author %></a></td>
+                    <td><%= postCounts[author] %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>

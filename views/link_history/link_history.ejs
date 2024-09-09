@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link History</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Page URL</th>
+                <th>Page Title</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% loggedInformationList.forEach(function(log) { %>
+                <tr>
+                    <td><a href="<%= log.pageUrl %>" target="_blank"><%= log.pageUrl %></a></td>
+                    <td><%= log.pageTitle %></td>
+                    <td><%= log.startTime %></td>
+                    <td><%= log.endTime %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>
