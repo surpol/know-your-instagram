@@ -186,8 +186,8 @@ app.get('/comments', (req, res) => {
             time: formattedTime
         };
     });
-
-    res.render('activity/comments', { commentsList });
+    const totalComments = commentsList.length;
+    res.render('activity/comments', { totalComments,commentsList });
 });
 
 app.get('/reel_comments', (req, res) => {
@@ -205,9 +205,10 @@ app.get('/reel_comments', (req, res) => {
             mediaOwner,
             time: formattedTime
         };
-    });
 
-    res.render('activity/comments', { commentsList });
+    });
+    const totalComments = commentsList.length;
+    res.render('activity/comments', { totalComments,commentsList });
 });
 
 app.get('/liked_posts', (req, res) => {
@@ -230,9 +231,9 @@ app.get('/liked_posts', (req, res) => {
 
         organizedLikes[title].push(...hrefs); // Add the URLs to the array for this title
     });
-
+    const likedCount = likesData.likes_media_likes.length;
     // Render the EJS template, passing the organized likes
-    res.render('activity/liked_posts', { organizedLikes });
+    res.render('activity/liked_posts', { likedCount,organizedLikes });
 });
 
 
@@ -320,8 +321,6 @@ app.get('/login_activity', async (req, res) => {
             const ipAddress = login.string_map_data['IP Address']?.value || 'Unknown IP Address';
             const timestamp = login.string_map_data['Time']?.timestamp || null;
             const formattedTime = timestamp ? new Date(timestamp * 1000).toLocaleString() : 'Unknown Time';
-
-            // Get location from the IP address
             const location = ipAddress !== 'Unknown IP Address' ? await getLocationFromIP(ipAddress) : 'Unknown Location';
 
             return {
