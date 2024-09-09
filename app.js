@@ -167,6 +167,7 @@ app.get('/following', (req, res) => {
 
 // Pass the list to the EJS template
 app.get('/link_history', (req, res) => {
+    console.log(loggedInformationList);
     res.render('link_history/link_history', { loggedInformationList });
 });
 

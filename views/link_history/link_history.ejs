@@ -4,12 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Link History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 25%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
 </head>
 <body>
     <table>
         <thead>
             <tr>
-                <th>Page URL</th>
                 <th>Page Title</th>
                 <th>Start Time</th>
                 <th>End Time</th>
@@ -18,8 +35,7 @@
         <tbody>
             <% loggedInformationList.forEach(function(log) { %>
                 <tr>
-                    <td><a href="<%= log.pageUrl %>" target="_blank"><%= log.pageUrl %></a></td>
-                    <td><%= log.pageTitle %></td>
+                    <td><a href="<%= log.pageUrl %>" target="_blank"><%= log.pageTitle %></a></td>
                     <td><%= log.startTime %></td>
                     <td><%= log.endTime %></td>
                 </tr>
