@@ -21,7 +21,8 @@
     </style>
 </head>
 <body>
-    <h1>Messages for <%= user %></h1>
+    <h1><%= user %></h1>
+    <h1>Total: <%= messages.length%></h1>
 
     <% if (messages && messages.length > 0) { %>
         <% messages.forEach(function(message) { %>

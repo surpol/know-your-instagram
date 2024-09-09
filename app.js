@@ -9,7 +9,6 @@ app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Directory paths
-const baseDirectory = path.join(__dirname, 'data');
 const adsAndTopicsDirectoryPath = path.join(__dirname, 'data', 'ads_information', 'ads_and_topics');
 const connectionsDirectoryPath = path.join(__dirname, 'data', 'connections', 'followers_and_following');
 const linkHistoryDirectory = path.join(__dirname, 'data', 'logged_information', 'link_history');
@@ -94,23 +93,6 @@ const followingList = followingData.relationships_following.map(following => {
         time: following.string_list_data[0].timestamp ? new Date(following.string_list_data[0].timestamp * 1000).toLocaleString() : 'Unknown Time'
     };
 });
-
-// Link history
-const loggedInformation = path.join(linkHistoryDirectory, 'link_history.json');
-const loggedInformationData = JSON.parse(fs.readFileSync(loggedInformation, 'utf8'));
-const loggedInformationList = loggedInformationData.map(log => {
-    const pageUrl = log.label_values.find(item => item.ent_field_name === 'PageURL')?.value || 'N/A';
-    const pageTitle = log.label_values.find(item => item.ent_field_name === 'PageTitle')?.value || 'N/A';
-    const startTime = log.label_values.find(item => item.ent_field_name === 'StartTime')?.value || 'Unknown Time';
-    const endTime = log.label_values.find(item => item.ent_field_name === 'EndTime')?.value || 'Unknown Time';
-
-    return {
-        pageUrl,
-        pageTitle,
-        startTime,
-        endTime
-    };
-});
     
 // Route for the home page
 app.get('/', (req, res) => {
@@ -167,9 +149,27 @@ app.get('/following', (req, res) => {
 
 // Pass the list to the EJS template
 app.get('/link_history', (req, res) => {
-    console.log(loggedInformationList);
+    const loggedInformation = path.join(linkHistoryDirectory, 'link_history.json');
+    const loggedInformationData = JSON.parse(fs.readFileSync(loggedInformation, 'utf8'));
+
+    const loggedInformationList = loggedInformationData.map(log => {
+        const pageUrl = log.label_values.find(item => item.ent_field_name === 'PageURL')?.value || 'N/A';
+        const pageTitle = log.label_values.find(item => item.ent_field_name === 'PageTitle')?.value || 'N/A';
+        const startTime = log.label_values.find(item => item.ent_field_name === 'StartTime')?.value || 'Unknown Time';
+        const endTime = log.label_values.find(item => item.ent_field_name === 'EndTime')?.value || 'Unknown Time';
+        return {
+            pageUrl,
+            pageTitle,
+            startTime,
+            endTime,
+        };
+    });
+
     res.render('link_history/link_history', { loggedInformationList });
 });
+
+
+
 
 app.get('/comments', (req, res) => {
     const comments = path.join(activityDirectory, 'comments','post_comments_1.json');
@@ -258,9 +258,9 @@ app.get('/liked_comments', (req, res) => {
 
         organizedLikes[title].push(...hrefs); // Add the URLs to the array for this title
     });
-
+    const likedCount = likesData.likes_comment_likes.length;
     // Render the EJS template, passing the organized likes
-    res.render('activity/liked_comments', { organizedLikes });
+    res.render('activity/liked_comments', { likedCount,organizedLikes });
 });
 
 // Route to display usernames
@@ -271,8 +271,8 @@ app.get('/messages', (req, res) => {
     const users = fs.readdirSync(inboxDirectory).filter(user => {
         return fs.lstatSync(path.join(inboxDirectory, user)).isDirectory();
     });
-
-    res.render('activity/messages', { users });
+    const count = users.length;
+    res.render('activity/messages', { count,users });
 });
 
 app.get('/messages/:username', (req, res) => {

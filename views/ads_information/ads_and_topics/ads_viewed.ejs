@@ -3,10 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seen ads</title>
+    <title>Ads Viewed</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        td {
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            th, td {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
 </head>
-<body>
-    
+<body>    
+    <h1>Ads Viewed</h1>
     <p><strong>Timespan:</strong> From <%= adTimespan.start %> to <%= adTimespan.end %></p>
     
     <table>
@@ -25,5 +101,6 @@
             <% }); %>
         </tbody>
     </table>
+
 </body>
 </html>

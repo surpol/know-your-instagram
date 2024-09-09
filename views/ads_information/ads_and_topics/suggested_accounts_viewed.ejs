@@ -3,25 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suggested accounts seen</title>
+    <title>Suggested Accounts Viewed</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #7e79d7;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #7e79d7;
+            color: white;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        td {
+            border-bottom: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        a {
+            color: #7e79d7;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive for mobile */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            th, td {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <h1>Suggested Accounts Viewed</h1>
+
     <table>
         <thead>
             <tr>
-                <th>author</th>
-                <th>time</th>
+                <th>Username</th>
+                <th>Time</th>
             </tr>
         </thead>
         <tbody>
             <% suggestedAccountsList.forEach(function(account) { %>
                 <tr>
                     <td><a href="https://www.instagram.com/<%= account.username %>" target="_blank"><%= account.username %></a></td>
-
                     <td><%= account.time %></td>
                 </tr>
             <% }); %>
         </tbody>
     </table>
+
 </body>
 </html>
