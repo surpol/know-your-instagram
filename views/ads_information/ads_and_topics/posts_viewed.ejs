@@ -10,6 +10,9 @@
             background-color: #f4f4f4;
             margin: 0;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         h1 {
@@ -20,99 +23,182 @@
             letter-spacing: 1px;
         }
 
-        p {
+        /* Back Button Style */
+        .back-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-size: 16px;
-            color: #555;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        table {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            border-collapse: collapse;
-            background-color: #fff;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px 20px;
             border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            font-size: 16px;
-        }
-
-        th {
-            background-color: #ab2929;
-            color: #fff;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        td {
-            border-bottom: 1px solid #ddd;
-            color: #ab2929;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        a {
-            color: #ab2929;
+            border: 1px solid #f5c6cb;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
             text-decoration: none;
             font-weight: bold;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        a:hover {
-            text-decoration: underline;
+        .back-button:hover {
+            background-color: #f1b0b7;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Arrow Icon for Back Button */
+        .back-button::before {
+            content: "← ";
+            margin-right: 5px;
+        }
+
+        /* Timespan container styling */
+        .timespan-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Styling for individual time span boxes */
+        .timespan-box {
+            font-size: 14px;
+            padding: 8px 16px;
+            background-color: #eaf7ea;
+            border-radius: 10px;
+            border: 1px solid #ab2929;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: #ab2929;
+            display: inline-block;
+        }
+
+        .timespan-box span {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Style the canvas for the bar chart */
+        #barChart {
+            max-width: 1000px;
+            width: 100%;
+            height: auto;
         }
 
         /* Mobile Responsiveness */
         @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-
             h1 {
                 font-size: 28px;
             }
 
-            th, td {
-                font-size: 14px;
-                padding: 10px;
+            .timespan-container {
+                flex-direction: column;
             }
 
-            table {
-                width: 100%;
+            .timespan-box {
+                font-size: 12px;
+                padding: 6px 12px;
+                margin-bottom: 10px;
             }
         }
+        
     </style>
+
+    <!-- Include Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
+    <!-- Back Button -->
+    <a href="/" class="back-button">Back to main</a>
+
     <h1>Posts Viewed</h1>
 
-    <p><strong>Timespan:</strong> From <%= postTimespan.start %> to <%= postTimespan.end %></p>
+    <!-- Timespan Section with Separated "From" and "To" Boxes -->
+    <div class="timespan-container">
+        <div class="timespan-box">
+            <span>From:</span> <%= postTimespan.start %>
+        </div>
+        <div class="timespan-box">
+            <span>To:</span> <%= postTimespan.end %>
+        </div>
+    </div>
     
-    <table>
-        <thead>
-            <tr>
-                <th>Author</th>
-                <th>Count</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% Object.keys(postCounts).forEach(function(author) { %>
-                <tr>
-                    <td><a href="https://www.instagram.com/<%= author %>" target="_blank"><%= author %></a></td>
-                    <td><%= postCounts[author] %></td>
-                </tr>
-            <% }); %>
-        </tbody>
-    </table>
+    <!-- Canvas for Bar Chart -->
+    <canvas id="barChart"></canvas>
+
+    <script>
+        // Correct way to pass `postCounts` from server-side EJS to client-side JS
+        const postCounts = <%- JSON.stringify(postCounts) %>;
+
+        // Extract data for labels (post authors) and values (number of views)
+        const labels = Object.keys(postCounts);
+        const data = Object.values(postCounts);
+
+        // Generate random colors for the bars
+        const backgroundColors = labels.map(() => {
+            return `hsl(${Math.random() * 360}, 70%, 50%)`; // Random hues
+        });
+
+        // Create the horizontal bar chart
+        const ctx = document.getElementById('barChart').getContext('2d');
+        const barChart = new Chart(ctx, {
+            type: 'bar', // Bar chart type
+            data: {
+                labels: labels, // Post authors
+                datasets: [{
+                    label: 'Posts Viewed',
+                    data: data, // Number of posts viewed
+                    backgroundColor: backgroundColors,
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Makes the bars horizontal
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false // Hides the legend
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
+                                const percentage = (context.raw / total * 100).toFixed(2);
+                                return `${context.label}: ${context.raw} posts (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const clickedIndex = elements[0].index;
+                        const clickedAuthor = labels[clickedIndex];
+                        window.open(`https://www.instagram.com/${clickedAuthor}`, '_blank'); // Opens the Instagram profile in a new tab
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true, // Starts the X-axis at 0
+                        grid: {
+                            display: false // Reduces gridline clutter
+                        },
+                        ticks: {
+                            stepSize: 2 // Reduce the number of grid lines
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            autoSkip: false, // Prevent skipping of labels
+                            padding: 10 // Add more space between labels and bars
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>

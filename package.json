@@ -4,7 +4,8 @@
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "ipinfo": "^1.5.1",
-    "node": "^22.8.0"
+    "node": "^22.8.0",
+    "sql.js": "^1.11.0"
   },
   "name": "knowyourig",
   "version": "1.0.0",

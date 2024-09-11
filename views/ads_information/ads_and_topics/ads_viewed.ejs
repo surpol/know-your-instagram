@@ -11,96 +11,191 @@
             color: #333;
             margin: 0;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Back Button Style */
+        .back-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            background-color: #f8d7da; /* Light red background to make it stand out */
+            color: #721c24; /* Dark red text */
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid #f5c6cb;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #f1b0b7;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Arrow Icon for Back Button */
+        .back-button::before {
+            content: "← ";
+            margin-right: 5px;
         }
 
         h1 {
             text-align: center;
-            font-size: 36px;
+            font-size: 32px;
             color: #4CAF50;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
-        p {
-            font-size: 16px;
+        /* Adjust box sizes */
+        .timespan-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
             margin-bottom: 20px;
             text-align: center;
         }
 
-        table {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .timespan-box {
+            font-size: 14px; /* Reduced font size */
+            padding: 8px 16px; /* Reduced padding */
+            background-color: #eaf7ea;
             border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        td {
-            border-bottom: 1px solid #ddd;
-            font-size: 14px;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        a {
+            border: 1px solid #4CAF50;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             color: #4CAF50;
-            text-decoration: none;
+            display: inline-block;
         }
 
-        a:hover {
-            text-decoration: underline;
+        .timespan-box span {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Style the canvas for the bar chart */
+        #barChart {
+            max-width: 1000px;
+            width: 100%;
+            height: auto;
         }
 
         /* Mobile Responsiveness */
         @media (max-width: 600px) {
-            th, td {
-                font-size: 12px;
-                padding: 10px;
-            }
-
             h1 {
                 font-size: 28px;
             }
+
+            .timespan-container {
+                flex-direction: column;
+            }
+
+            .timespan-box {
+                font-size: 12px; /* Further reduced for mobile */
+                padding: 6px 12px;
+                margin-bottom: 10px;
+            }
         }
     </style>
-</head>
-<body>    
-    <h1>Ads Viewed</h1>
-    <p><strong>Timespan:</strong> From <%= adTimespan.start %> to <%= adTimespan.end %></p>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>author</th>
-                <th>count</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% Object.keys(adCounts).forEach(function(author) { %>
-                <tr>
-                    <td><a href="https://www.instagram.com/<%= author %>" target="_blank"><%= author %></a></td>
-                    <td><%= adCounts[author] %></td>
-                </tr>
-            <% }); %>
-        </tbody>
-    </table>
 
+    <!-- Include Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Back Button placed above the header -->
+    <a href="/" class="back-button">Back to main</a>
+
+    <h1>Ads Viewed</h1>
+
+    <!-- Separated Timespan Boxes -->
+    <div class="timespan-container">
+        <div class="timespan-box">
+            <span>From:</span> <%= adTimespan.start %>
+        </div>
+        <div class="timespan-box">
+            <span>To:</span> <%= adTimespan.end %>
+        </div>
+    </div>
+
+    <!-- Canvas for Bar Chart -->
+    <canvas id="barChart"></canvas>
+
+    <script>
+        // Correct way to pass `adCounts` from server-side EJS to client-side JS
+        const adCounts = <%- JSON.stringify(adCounts) %>;
+
+        // Extract data for labels (advertisers) and values (number of ads)
+        const labels = Object.keys(adCounts);
+        const data = Object.values(adCounts);
+
+        // Generate random colors for the bars
+        const backgroundColors = labels.map(() => {
+            return `hsl(${Math.random() * 360}, 70%, 50%)`; // Random hues
+        });
+
+        // Create the horizontal bar chart
+        const ctx = document.getElementById('barChart').getContext('2d');
+        const barChart = new Chart(ctx, {
+            type: 'bar', // Bar chart type
+            data: {
+                labels: labels, // Advertiser names
+                datasets: [{
+                    label: 'Ads Viewed',
+                    data: data, // Number of ads
+                    backgroundColor: backgroundColors,
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Makes the bars horizontal
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false // Hides the legend
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
+                                const percentage = (context.raw / total * 100).toFixed(2);
+                                return `${context.label}: ${context.raw} ads (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const clickedIndex = elements[0].index;
+                        const clickedAuthor = labels[clickedIndex];
+                        window.open(`https://www.instagram.com/${clickedAuthor}`, '_blank'); // Opens the Instagram profile in a new tab
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true, // Starts the X-axis at 0
+                        grid: {
+                            display: false // Reduces gridline clutter
+                        },
+                        ticks: {
+                            stepSize: 2 // Reduce the number of grid lines
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            autoSkip: false, // Prevent skipping of labels
+                            padding: 10 // Add more space between labels and bars
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
