@@ -6,10 +6,16 @@
     <title>Suggested Accounts Viewed</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
             margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         h1 {
@@ -21,36 +27,22 @@
             letter-spacing: 2px;
         }
 
-        table {
+        .timeline {
             width: 100%;
-            max-width: 900px;
+            max-width: 500px;
             margin: 0 auto;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
+            padding: 10px;
         }
 
-        th, td {
-            padding: 15px 20px;
-            text-align: left;
+        .timeline-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
         }
 
-        th {
-            background-color: #7e79d7;
-            color: white;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        td {
-            border-bottom: 1px solid #ddd;
-            font-size: 16px;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
+        .timeline-date {
+            font-weight: bold;
+            color: #333;
         }
 
         a {
@@ -63,42 +55,157 @@
             text-decoration: underline;
         }
 
-        /* Responsive for mobile */
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
+        .filter-container,
+        .sort-container {
+            margin-bottom: 20px;
+        }
 
-            h1 {
-                font-size: 28px;
-            }
+        select,
+        input {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #7e79d7;
+            background-color: #f7f7f7;
+            color: #333;
+            margin-right: 10px;
+        }
 
-            th, td {
-                font-size: 14px;
-                padding: 10px;
-            }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #7e79d7;
+            background-color: #7e79d7;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #5e5bb5;
         }
     </style>
 </head>
 <body>
     <h1>Suggested Accounts Viewed</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% suggestedAccountsList.forEach(function(account) { %>
-                <tr>
-                    <td><a href="https://www.instagram.com/<%= account.username %>" target="_blank"><%= account.username %></a></td>
-                    <td><%= account.time %></td>
-                </tr>
-            <% }); %>
-        </tbody>
-    </table>
+    <!-- Date Range Filter Inputs -->
+    <div class="filter-container">
+        <label for="startDate">Start Date: </label>
+        <input type="date" id="startDate">
+        <label for="endDate">End Date: </label>
+        <input type="date" id="endDate">
+        <button onclick="filterByDate()">Filter</button>
+    </div>
 
+    <!-- Sorting dropdown -->
+    <div class="sort-container">
+        <label for="sort">Sort by: </label>
+        <select id="sort" onchange="sortTimeline()">
+            <option value="default">Default</option>
+            <option value="dateAsc"> Ascending</option>
+            <option value="dateDesc">Descending</option>
+            <option value="alphabetical">Alphabetical (A-Z)</option>
+        </select>
+    </div>
+
+    <!-- Timeline View -->
+    <div id="timelineView" class="timeline"></div>
+
+    <script>
+        const suggestedAccountsList = <%- JSON.stringify(suggestedAccountsList) %>;
+
+        let filteredList = [...suggestedAccountsList]; // Holds the filtered data
+
+        // Function to render timeline
+        function renderTimeline(list) {
+            const timelineView = document.getElementById('timelineView');
+            timelineView.innerHTML = ''; // Clear existing timeline
+
+            if (list.length === 0) {
+                timelineView.innerHTML = '<p>No accounts viewed in the selected date range.</p>';
+                return;
+            }
+
+            list.forEach(account => {
+                if (account.time !== 'Unknown Time') {
+                    const timelineItem = document.createElement('div');
+                    timelineItem.classList.add('timeline-item');
+                    timelineItem.innerHTML = `
+                        <div class="timeline-date">${new Date(account.time).toLocaleString()}</div>
+                        <div class="timeline-content"><a href="https://www.instagram.com/${account.username}" target="_blank">${account.username}</a></div>
+                    `;
+                    timelineView.appendChild(timelineItem);
+                }
+            });
+        }
+
+        // Function to sort the timeline
+        function sortTimeline() {
+            const sortValue = document.getElementById('sort').value;
+            let sortedList = [...filteredList];
+
+            if (sortValue === 'dateAsc') {
+                sortedList.sort((a, b) => new Date(a.time) - new Date(b.time));
+            } else if (sortValue === 'dateDesc') {
+                sortedList.sort((a, b) => new Date(b.time) - new Date(a.time));
+            } else if (sortValue === 'alphabetical') {
+                sortedList.sort((a, b) => a.username.localeCompare(b.username));
+            }
+
+            renderTimeline(sortedList);
+        }
+
+        // Function to filter by date range
+        function filterByDate() {
+            const startDateInput = document.getElementById('startDate').value;
+            const endDateInput = document.getElementById('endDate').value;
+
+            if (!startDateInput || !endDateInput) {
+                alert("Please enter both start and end dates.");
+                return;
+            }
+
+            const startDate = new Date(startDateInput);
+            const endDate = new Date(endDateInput);
+
+            if (startDate > endDate) {
+                alert("Start date cannot be after end date.");
+                return;
+            }
+
+            filteredList = suggestedAccountsList.filter(account => {
+                const accountDate = new Date(account.time);
+                return accountDate >= startDate && accountDate <= endDate;
+            });
+
+            // After filtering, sort based on the current sort selection
+            sortTimeline();
+        }
+
+        // Function to set min/max date for filtering
+        function initializeDateRange() {
+            const validDates = suggestedAccountsList
+                .filter(account => account.time !== 'Unknown Time')
+                .map(account => new Date(account.time));
+
+            const minDate = new Date(Math.min(...validDates));
+            const maxDate = new Date(Math.max(...validDates));
+
+            document.getElementById('startDate').min = minDate.toISOString().split('T')[0];
+            document.getElementById('startDate').max = maxDate.toISOString().split('T')[0];
+            document.getElementById('endDate').min = minDate.toISOString().split('T')[0];
+            document.getElementById('endDate').max = maxDate.toISOString().split('T')[0];
+
+            document.getElementById('startDate').value = minDate.toISOString().split('T')[0];
+            document.getElementById('endDate').value = maxDate.toISOString().split('T')[0];
+        }
+
+        // Initialize timeline on page load
+        window.onload = function () {
+            initializeDateRange();
+            renderTimeline(suggestedAccountsList); // Initial full timeline
+        };
+    </script>
 </body>
 </html>

@@ -10,6 +10,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Directory paths
 const adsAndTopicsDirectoryPath = path.join(__dirname, 'data', 'ads_information', 'ads_and_topics');
+const instagramAdsDirectoryPath = path.join(__dirname, 'data', 'ads_information', 'instagram_ads_and_businesses');
+
 const connectionsDirectoryPath = path.join(__dirname, 'data', 'connections', 'followers_and_following');
 const linkHistoryDirectory = path.join(__dirname, 'data', 'logged_information', 'link_history');
 const activityDirectory = path.join(__dirname, 'data', 'your_instagram_activity');
@@ -33,7 +35,7 @@ const adsViewed = path.join(adsAndTopicsDirectoryPath, 'ads_viewed.json');
 const adsData = JSON.parse(fs.readFileSync(adsViewed, 'utf8'));
 // Count the occurrences of each ad (Author) and get the timespan
 const adCounts = adsData.impressions_history_ads_seen.reduce((counts, ad) => {
-    const author = ad.string_map_data.Author ? ad.string_map_data.Author.value : 'Unknown Author';
+    const author = ad.string_map_data.Author ? ad.string_map_data.Author.value : 'Unknown';
     counts[author] = (counts[author] || 0) + 1;
     return counts;
 }, {});
@@ -45,28 +47,17 @@ const postsViewed = path.join(adsAndTopicsDirectoryPath, 'posts_viewed.json');
 const postsData = JSON.parse(fs.readFileSync(postsViewed, 'utf8'));
 // Count the occurrences of each post (Author) and get the timespan
 const postCounts = postsData.impressions_history_posts_seen.reduce((counts, post) => {
-    const author = post.string_map_data.Author ? post.string_map_data.Author.value : 'Unknown Author';
+    const author = post.string_map_data.Author ? post.string_map_data.Author.value : 'Unknown';
     counts[author] = (counts[author] || 0) + 1;
     return counts;
 }, {});
 const postTimespan = getTimespan(postsData.impressions_history_posts_seen);
 
-// File paths 
-const suggestedAccountsViewed = path.join(adsAndTopicsDirectoryPath, 'suggested_accounts_viewed.json');
-const suggestedAccountsData = JSON.parse(fs.readFileSync(suggestedAccountsViewed, 'utf8'));
-// Suggested accounts data processing (optional)
-const suggestedAccountsList = suggestedAccountsData.impressions_history_chaining_seen.map(account => {
-    return {
-        username: account.string_map_data.Username ? account.string_map_data.Username.value : 'Unknown Username',
-        time: account.string_map_data.Time ? new Date(account.string_map_data.Time.timestamp * 1000).toLocaleString() : 'Unknown Time'
-    };
-});
-
 // Videos watched
 const videosWatched = path.join(adsAndTopicsDirectoryPath, 'videos_watched.json');
 const videosWatchedData = JSON.parse(fs.readFileSync(videosWatched, 'utf8'));
 const videosWatchedCounts = videosWatchedData.impressions_history_videos_watched.reduce((counts, video) => {
-    const author = video.string_map_data.Author ? video.string_map_data.Author.value : 'Unknown Author';
+    const author = video.string_map_data.Author ? video.string_map_data.Author.value : 'Unknown';
     counts[author] = (counts[author] || 0) + 1;
     return counts;
 }, {});
@@ -109,7 +100,8 @@ app.get('/', (req, res) => {
         { name: 'Liked Posts', route: '/liked_posts' },
         { name: 'Liked Comments', route: '/liked_comments' },
         { name: 'Messages', route: '/messages' },
-        { name: 'Login Activity', route: '/login_activity' }
+        { name: 'Login Activity', route: '/login_activity' },
+        { name: 'Advertisers', route: '/advertisers_using_your_activity_or_information' }
 
 
     ];        
@@ -127,10 +119,6 @@ app.get('/posts_viewed', (req, res) => {
     res.render('ads_information/ads_and_topics/posts_viewed', { postCounts, postTimespan });
 });
 
-// Route to display suggested accounts viewed
-app.get('/suggested_accounts_viewed', (req, res) => {
-    res.render('ads_information/ads_and_topics/suggested_accounts_viewed', { suggestedAccountsList });
-});
 
 // Route to display suggested accounts viewed
 app.get('/videos_watched', (req, res) => {
@@ -172,23 +160,23 @@ app.get('/link_history', (req, res) => {
 
 
 app.get('/comments', (req, res) => {
-    const comments = path.join(activityDirectory, 'comments','post_comments_1.json');
+    const comments = path.join(activityDirectory, 'comments', 'post_comments_1.json');
     const commentsData = JSON.parse(fs.readFileSync(comments, 'utf8'));
 
     const commentsList = commentsData.map(comment => {
-        const commentText = comment.string_map_data.Comment?.value || 'No Comment';
-        const mediaOwner = comment.string_map_data?.['Media Owner']?.value || 'Unknown Owner';
+        const commentText = decodeURIComponent(escape(comment.string_map_data.Comment?.value || 'No Comment'));
+        const mediaOwner = decodeURIComponent(escape(comment.string_map_data?.['Media Owner']?.value || 'Unknown Owner'));
         const timestamp = comment.string_map_data.Time.timestamp || null;
         const formattedTime = timestamp ? new Date(timestamp * 1000).toLocaleString() : 'Unknown Time';
-
         return {
             comment: commentText,
             mediaOwner,
             time: formattedTime
         };
     });
+
     const totalComments = commentsList.length;
-    res.render('activity/comments', { totalComments,commentsList });
+    res.render('activity/comments', { totalComments, commentsList });
 });
 
 app.get('/reel_comments', (req, res) => {
@@ -196,20 +184,19 @@ app.get('/reel_comments', (req, res) => {
     const commentsData = JSON.parse(fs.readFileSync(comments, 'utf8'));
 
     const commentsList = commentsData.comments_reels_comments.map(comment => {
-        const commentText = comment.string_map_data.Comment?.value || 'No Comment';
-        const mediaOwner = comment.string_map_data?.['Media Owner']?.value || 'Unknown Owner';
+        const commentText = decodeURIComponent(escape(comment.string_map_data.Comment?.value || 'No Comment'));
+        const mediaOwner = decodeURIComponent(escape(comment.string_map_data?.['Media Owner']?.value || 'Unknown Owner'));
         const timestamp = comment.string_map_data.Time.timestamp || null;
         const formattedTime = timestamp ? new Date(timestamp * 1000).toLocaleString() : 'Unknown Time';
-
         return {
             comment: commentText,
             mediaOwner,
             time: formattedTime
         };
-
     });
+
     const totalComments = commentsList.length;
-    res.render('activity/comments', { totalComments,commentsList });
+    res.render('activity/comments', { totalComments, commentsList });
 });
 
 app.get('/liked_posts', (req, res) => {
@@ -259,7 +246,6 @@ app.get('/liked_comments', (req, res) => {
         organizedLikes[title].push(...hrefs); // Add the URLs to the array for this title
     });
     const likedCount = likesData.likes_comment_likes.length;
-    // Render the EJS template, passing the organized likes
     res.render('activity/liked_comments', { likedCount,organizedLikes });
 });
 
@@ -292,7 +278,8 @@ app.get('/messages/:username', (req, res) => {
 
         res.render('activity/messages_thread', { 
             user: messageData.participants[0].name, 
-            messages: messageData.messages // Pass the messages array
+            messages: messageData.messages,
+            
         });
     } else {
         res.status(404).send('Message not found for user ' + username);
@@ -335,6 +322,23 @@ app.get('/login_activity', async (req, res) => {
     // Render the login_activity.ejs template with the enriched data
     res.render('activity/login_activity', { loginActivityList });
 });
+
+// Route to display suggested accounts viewed
+app.get('advertisers_using_your_activity_or_information', (req, res) => {
+    const advertisers = path.join(instagramAdsDirectoryPath, 'advertisers_using_your_activity_or_information.json');
+    const advertisersData = JSON.parse(fs.readFileSync(advertisers, 'utf8'));
+
+    const advertisersList = advertisersData.ig_custom_audiences_all_types.map(advertiser => {
+        return {
+            name: advertiser.string_map_data.Name.value,
+            category: advertiser.string_map_data.Category.value,
+            time: new Date(advertiser.string_map_data.Time.timestamp * 1000).toLocaleString()
+        };
+    });
+
+    res.render('ads_information/instagram_ads_and_businesses/advertisers_using_your_activity_or_information', { advertisersList });
+});
+
 
 
 

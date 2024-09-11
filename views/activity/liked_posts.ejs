@@ -9,37 +9,194 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             color: #333;
+            margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        h2 {
+
+        h1 {
+            text-align: left;
+            font-size: 28px;
             color: #444;
+            margin-bottom: 20px;
         }
+
+        .back-button {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .back-button a {
+            text-decoration: none;
+            color: #1a0dab;
+            font-size: 16px;
+        }
+
+        .back-button a:hover {
+            text-decoration: underline;
+        }
+
+        .sort-container {
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 columns */
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .grid-item {
+            position: relative; /* Enable absolute positioning for floating likes */
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            overflow-y: auto; /* Enable vertical scrolling inside the card */
+            max-height: 300px; /* Adjust height as needed */
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #1a0dab;
+            margin-bottom: 10px;
+        }
+
+        h2 a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        h2 a:hover {
+            text-decoration: underline;
+        }
+
         ul {
-            list-style-type: none;
+            list-style: none;
             padding: 0;
+            margin: 0;
         }
-        ul li {
-            margin: 5px 0;
+
+        li {
+            margin-bottom: 10px;
         }
+
         a {
             color: #1a0dab;
             text-decoration: none;
+            font-size: 14px;
         }
+
         a:hover {
             text-decoration: underline;
+        }
+
+        /* Floating Likes Count */
+        .like-count {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+            color: gray;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns for medium screens */
+            }
+        }
+
+        @media (max-width: 600px) {
+            .grid-container {
+                grid-template-columns: 1fr; /* 1 column for small screens */
+            }
+
+            h1 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Total: <%=likedCount%></h1>
 
-    <% Object.keys(organizedLikes).forEach(function(title) { %>
-        <h2><%= title %></h2>
-        <ul>
-            <% organizedLikes[title].forEach(function(href) { %>
-                <li><a href="<%= href %>" target="_blank"><%= href %></a></li>
-            <% }); %>
-        </ul>
-    <% }); %>
+    <h1>LIKED POSTS: <%= likedCount %></h1>
+
+    <div class="back-button">
+        <a href="/">← Back to main</a>
+    </div>
+
+    <div class="sort-container">
+        <label for="sort">Sort by: </label>
+        <select id="sort" onchange="sortGrid()">
+            <option value="default">Default</option>
+            <option value="alphabetical">Alphabetical (A-Z)</option>
+            <option value="likesAsc">Likes (Ascending)</option>
+            <option value="likesDesc">Likes (Descending)</option>
+        </select>
+    </div>
+
+    <div class="grid-container" id="gridContainer">
+        <% Object.keys(organizedLikes).forEach(function(title) { %>
+            <div class="grid-item" data-title="<%= title %>" data-likes="<%= organizedLikes[title].length %>">
+                <div class="like-count">
+                    Likes: <%= organizedLikes[title].length %>
+                </div>
+                <h2><a href="https://www.instagram.com/<%= title %>" target="_blank"><%= title %></a></h2>
+                <ul>
+                    <% organizedLikes[title].forEach(function(href) { %>
+                        <li><a href="<%= href %>" target="_blank"><%= href %></a></li>
+                    <% }); %>
+                </ul>
+            </div>
+        <% }); %>
+    </div>
+
+    <script>
+        const originalOrder = Array.from(document.getElementsByClassName('grid-item'));
+
+        function sortGrid() {
+            const gridContainer = document.getElementById('gridContainer');
+            const gridItems = Array.from(gridContainer.getElementsByClassName('grid-item'));
+            const sortValue = document.getElementById('sort').value;
+
+            let sortedItems;
+            if (sortValue === 'alphabetical') {
+                sortedItems = gridItems.sort((a, b) => {
+                    return a.getAttribute('data-title').localeCompare(b.getAttribute('data-title'));
+                });
+            } else if (sortValue === 'likesAsc') {
+                sortedItems = gridItems.sort((a, b) => {
+                    return parseInt(a.getAttribute('data-likes')) - parseInt(b.getAttribute('data-likes'));
+                });
+            } else if (sortValue === 'likesDesc') {
+                sortedItems = gridItems.sort((a, b) => {
+                    return parseInt(b.getAttribute('data-likes')) - parseInt(a.getAttribute('data-likes'));
+                });
+            } else {
+                // Default sort (original order)
+                sortedItems = originalOrder;
+            }
+
+            // Re-append sorted items to the container
+            sortedItems.forEach(item => gridContainer.appendChild(item));
+        }
+    </script>
+
 </body>
 </html>

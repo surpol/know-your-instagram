@@ -6,32 +6,101 @@
     <title>Login Activity</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-        }
-        table {
-            width: 25%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
+            font-family: 'Arial', sans-serif;
             background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff5722;
+            font-size: 36px;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #555;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        th {
+            background-color: #ff5722;
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        td {
+            border-bottom: 1px solid #ddd;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        a {
+            color: #ff5722;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        .back-button {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            th, td {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            table {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>    
+    <h1>Login Sessions</h1>
+    <div class="back-button">
+        <a href="/">← Back to main</a>
+    </div>
     <table>
-        <thead>
-            <tr>
-                <th>Device</th>
-                <th>Location (IP Address)</th>
-                <th>Time</th>
-            </tr>
-        </thead>
         <tbody>
             <% loginActivityList.forEach(function(activity) { %>
                 <tr>

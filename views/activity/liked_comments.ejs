@@ -6,40 +6,106 @@
     <title>Liked Comments</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
             padding: 20px;
         }
-        h2 {
-            color: #444;
+
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #7e79d7;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        ul {
-            list-style-type: none;
-            padding: 0;
+
+        table {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
-        ul li {
-            margin: 5px 0;
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
         }
+
+        th {
+            background-color: #7e79d7;
+            color: white;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        td {
+            border-bottom: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
         a {
-            color: #1a0dab;
+            color: #7e79d7;
             text-decoration: none;
+            font-weight: bold;
         }
+
         a:hover {
             text-decoration: underline;
+        }
+
+        .back-button {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 20px;
+        }
+
+        /* Responsive for mobile */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            th, td {
+                font-size: 14px;
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Total: <%= likedCount%></h1>
 
-    <% Object.keys(organizedLikes).forEach(function(title) { %>
-        <h2><%= title %></h2>
-        <ul>
-            <% organizedLikes[title].forEach(function(href) { %>
-                <li><a href="<%= href %>" target="_blank"><%= href %></a></li>
+    <h1>Liked Comments: <%= likedCount %></h1>
+    <div class="back-button">
+        <a href="/">← Back to main</a>
+    </div>
+    <table>
+        <tbody>
+            <% Object.keys(organizedLikes).forEach(function(title) { %>
+                <% organizedLikes[title].forEach(function(href) { %>
+                    <tr>
+                        <td>
+                            <h2> <a href="<%= href %>" target="_blank" > <%= title %> </a></h2>
+                        </td>
+                    </tr>
+                <% }); %>
             <% }); %>
-        </ul>
-    <% }); %>
+        </tbody>
+    </table>
+    
+
 </body>
 </html>

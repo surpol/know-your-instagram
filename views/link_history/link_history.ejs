@@ -9,21 +9,40 @@
             font-family: Arial, sans-serif;
         }
         table {
-            width: 25%;
+            width: 100%;
+            max-width: 600px;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 20px auto;
+            border: 1px solid #ddd;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            padding: 12px;
             text-align: left;
+            border-bottom: 1px solid #ddd;
         }
         th {
             background-color: #f4f4f4;
         }
+        td a {
+            color: #0073e6;
+            text-decoration: none;
+        }
+        td a:hover {
+            text-decoration: underline;
+        }
+        /* Center the back button */
+        .back-button {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
+    <h1 style="text-align: center;">Link History</h1>
+    <div class="back-button">
+        <a href="/">← Back to main</a>
+    </div>
     <table>
         <thead>
             <tr>
@@ -33,13 +52,19 @@
             </tr>
         </thead>
         <tbody>
-            <% loggedInformationList.forEach(function(log) { %>
+            <% if (loggedInformationList && loggedInformationList.length > 0) { %>
+                <% loggedInformationList.forEach(function(log) { %>
+                    <tr>
+                        <td><a href="<%= log.pageUrl %>" target="_blank"><%= log.pageTitle %></a></td>
+                        <td><%= log.startTime %></td>
+                        <td><%= log.endTime %></td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
                 <tr>
-                    <td><a href="<%= log.pageUrl %>" target="_blank"><%= log.pageTitle %></a></td>
-                    <td><%= log.startTime %></td>
-                    <td><%= log.endTime %></td>
+                    <td colspan="3" style="text-align: center;">No link history available</td>
                 </tr>
-            <% }); %>
+            <% } %>
         </tbody>
     </table>
 </body>
