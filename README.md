@@ -11,4 +11,5 @@ Download your instagram data (all time, 1 year, etc): https://help.instagram.com
 run cmd ```npm install``` to install dependencies in packages.json
 run cmd ```nodemon app``` to run application
 
-
+### Step 4
+View on http://localhost:3000
