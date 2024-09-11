@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advertisers Using Your Activity or Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        td {
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            th, td {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Advertisers Using Your Activity or Information</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Advertiser</th>
+                <th>Uses Data File Audience</th>
+                <th>Uses Remarketing</th>
+                <th>In-Person Store Visit</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% advertisersList.forEach(function(advertiser) { %>
+                <tr>
+                    <td><%= advertiser.name %></td>
+                    <td><%= advertiser.hasDataFileCustomAudience ? 'Yes' : 'No' %></td>
+                    <td><%= advertiser.hasRemarketingCustomAudience ? 'Yes' : 'No' %></td>
+                    <td><%= advertiser.hasInPersonStoreVisit ? 'Yes' : 'No' %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>

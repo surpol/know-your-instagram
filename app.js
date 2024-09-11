@@ -1,8 +1,9 @@
 const express = require('express');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
+const ipinfo = require('ipinfo');
+
 const app = express();
-const ipinfo = require("ipinfo");
 
 // Set EJS as the templating engine
 app.set('view engine', 'ejs');
@@ -11,11 +12,30 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Directory paths
 const adsAndTopicsDirectoryPath = path.join(__dirname, 'data', 'ads_information', 'ads_and_topics');
 const instagramAdsDirectoryPath = path.join(__dirname, 'data', 'ads_information', 'instagram_ads_and_businesses');
-
 const connectionsDirectoryPath = path.join(__dirname, 'data', 'connections', 'followers_and_following');
 const linkHistoryDirectory = path.join(__dirname, 'data', 'logged_information', 'link_history');
 const activityDirectory = path.join(__dirname, 'data', 'your_instagram_activity');
-const loginInformationDirectory = path.join(__dirname, 'data', 'security_and_login_information', 'login_and_account_creation');
+// Determine the correct login directory based on which folder exists
+const loginInformationDirectoryAccount = path.join(__dirname, 'data', 'security_and_login_information', 'login_and_account_creation');
+const loginInformationDirectoryProfile = path.join(__dirname, 'data', 'security_and_login_information', 'login_and_profile_creation');
+
+let loginInformationDirectory = loginInformationDirectoryAccount; // Default to 'login_and_account_creation'
+
+(async () => {
+    try {
+        // Check if the 'login_and_account_creation' folder exists
+        await fs.access(loginInformationDirectoryAccount);
+    } catch (error) {
+        // If 'login_and_account_creation' doesn't exist, check for 'login_and_profile_creation'
+        try {
+            await fs.access(loginInformationDirectoryProfile);
+            loginInformationDirectory = loginInformationDirectoryProfile;
+        } catch (err) {
+            console.error('Neither login_and_account_creation nor login_and_profile_creation folder exists.');
+            process.exit(1); // Exit the application if neither folder exists
+        }
+    }
+})();
 
 
 // Helper function to get timespan (min and max timestamps) for a dataset
@@ -29,62 +49,6 @@ function getTimespan(data) {
     };
 }
 
-// Ads viewed
-const adsViewed = path.join(adsAndTopicsDirectoryPath, 'ads_viewed.json');
-// Read and parse the JSON files
-const adsData = JSON.parse(fs.readFileSync(adsViewed, 'utf8'));
-// Count the occurrences of each ad (Author) and get the timespan
-const adCounts = adsData.impressions_history_ads_seen.reduce((counts, ad) => {
-    const author = ad.string_map_data.Author ? ad.string_map_data.Author.value : 'Unknown';
-    counts[author] = (counts[author] || 0) + 1;
-    return counts;
-}, {});
-const adTimespan = getTimespan(adsData.impressions_history_ads_seen);
-
-
-// Posts Viewed 
-const postsViewed = path.join(adsAndTopicsDirectoryPath, 'posts_viewed.json');
-const postsData = JSON.parse(fs.readFileSync(postsViewed, 'utf8'));
-// Count the occurrences of each post (Author) and get the timespan
-const postCounts = postsData.impressions_history_posts_seen.reduce((counts, post) => {
-    const author = post.string_map_data.Author ? post.string_map_data.Author.value : 'Unknown';
-    counts[author] = (counts[author] || 0) + 1;
-    return counts;
-}, {});
-const postTimespan = getTimespan(postsData.impressions_history_posts_seen);
-
-// Videos watched
-const videosWatched = path.join(adsAndTopicsDirectoryPath, 'videos_watched.json');
-const videosWatchedData = JSON.parse(fs.readFileSync(videosWatched, 'utf8'));
-const videosWatchedCounts = videosWatchedData.impressions_history_videos_watched.reduce((counts, video) => {
-    const author = video.string_map_data.Author ? video.string_map_data.Author.value : 'Unknown';
-    counts[author] = (counts[author] || 0) + 1;
-    return counts;
-}, {});
-const videoTimespan = getTimespan(videosWatchedData.impressions_history_videos_watched);
-
-// Followers and following
-const followers = path.join(connectionsDirectoryPath, 'followers_1.json');
-const followersData = JSON.parse(fs.readFileSync(followers, 'utf8'));
-const followersList = followersData.map(follower => {
-    return {
-        link: follower.string_list_data[0].href ? follower.string_list_data[0].href : 'Link n/a',
-        username: follower.string_list_data[0].value ? follower.string_list_data[0].value : 'User n/a',
-        time: follower.string_list_data[0].timestamp ? new Date(follower.string_list_data[0].timestamp * 1000).toLocaleString() : 'Unknown Time'
-    };
-});
-
-// Followers and following
-const following = path.join(connectionsDirectoryPath, 'following.json');
-const followingData = JSON.parse(fs.readFileSync(following, 'utf8'));
-const followingList = followingData.relationships_following.map(following => {
-    return {
-        link: following.string_list_data[0].href ? following.string_list_data[0].href : 'Link n/a',
-        username: following.string_list_data[0].value ? following.string_list_data[0].value : 'User n/a',
-        time: following.string_list_data[0].timestamp ? new Date(following.string_list_data[0].timestamp * 1000).toLocaleString() : 'Unknown Time'
-    };
-});
-    
 // Route for the home page
 app.get('/', (req, res) => {
     const items = [
@@ -102,40 +66,44 @@ app.get('/', (req, res) => {
         { name: 'Messages', route: '/messages' },
         { name: 'Login Activity', route: '/login_activity' },
         { name: 'Advertisers', route: '/advertisers_using_your_activity_or_information' }
+    ];
 
-
-    ];        
-
-    res.render('index', { items});
+    res.render('index', { items });
 });
 
-// Route to display ads viewed and occurrences with timespan
-app.get('/ads_viewed', (req, res) => {
+// Route to display ads viewed
+app.get('/ads_viewed', async (req, res) => {
+    const adsFile = path.join(adsAndTopicsDirectoryPath, 'ads_viewed.json');
+    const adsData = JSON.parse(await fs.readFile(adsFile, 'utf8'));
+    const adCounts = adsData.impressions_history_ads_seen.reduce((counts, ad) => {
+        const author = ad.string_map_data.Author ? ad.string_map_data.Author.value : 'Unknown';
+        counts[author] = (counts[author] || 0) + 1;
+    return counts;
+    }, {});
+    const adTimespan = getTimespan(adsData.impressions_history_ads_seen);
     res.render('ads_information/ads_and_topics/ads_viewed', { adCounts, adTimespan });
 });
 
-// Route to display posts viewed and occurrences with timespan
-app.get('/posts_viewed', (req, res) => {
+// Route to display posts viewed
+app.get('/posts_viewed', async (req, res) => {
+    const postsFile = path.join(adsAndTopicsDirectoryPath, 'posts_viewed.json');
+    const postsData = JSON.parse(await fs.readFile(postsFile, 'utf8'));
+    const postCounts = postsData.impressions_history_posts_seen.reduce((counts, post) => {
+        const author = post.string_map_data.Author ? post.string_map_data.Author.value : 'Unknown';
+        counts[author] = (counts[author] || 0) + 1;
+    return counts;
+    }, {});
+    const postTimespan = getTimespan(postsData.impressions_history_posts_seen);
     res.render('ads_information/ads_and_topics/posts_viewed', { postCounts, postTimespan });
 });
 
 // Route to display suggested accounts viewed
-app.get('/suggested_accounts_viewed', (req, res) => {
-    // Define both file paths
-    const suggestedProfilesView = path.join(adsAndTopicsDirectoryPath, 'suggested_profiles_viewed.json');
-    const suggestedAccountsView = path.join(adsAndTopicsDirectoryPath, 'suggested_accounts_viewed.json');
+app.get('/suggested_accounts_viewed', async (req, res) => {
+    const suggestedProfilesFile = path.join(adsAndTopicsDirectoryPath, 'suggested_profiles_viewed.json');
+    const suggestedAccountsFile = path.join(adsAndTopicsDirectoryPath, 'suggested_accounts_viewed.json');
 
-    // Check which file exists and load the correct one
-    let fileToUse;
-    if (fs.existsSync(suggestedProfilesView)) {
-        fileToUse = suggestedProfilesView;
-    } else if (fs.existsSync(suggestedAccountsView)) {
-        fileToUse = suggestedAccountsView;
-    } else {
-        throw new Error('Neither suggested_profiles_viewed.json nor suggested_accounts_viewed.json found.');
-    }
-    const suggestedAccountsData = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
-    // Suggested accounts data processing (optional)
+    const fileToUse = await fs.access(suggestedProfilesFile).then(() => suggestedProfilesFile).catch(() => suggestedAccountsFile);
+    const suggestedAccountsData = JSON.parse(await fs.readFile(fileToUse, 'utf8'));
     const suggestedAccountsList = suggestedAccountsData.impressions_history_chaining_seen.map(account => {
         return {
             username: account.string_map_data.Username ? account.string_map_data.Username.value : 'Unknown Username',
@@ -146,178 +114,153 @@ app.get('/suggested_accounts_viewed', (req, res) => {
     res.render('ads_information/ads_and_topics/suggested_accounts_viewed', { suggestedAccountsList });
 });
 
-// Route to display suggested accounts viewed
-app.get('/videos_watched', (req, res) => {
+// Route to display videos watched
+app.get('/videos_watched', async (req, res) => {
+    const videosFile = path.join(adsAndTopicsDirectoryPath, 'videos_watched.json');
+    const videosData = JSON.parse(await fs.readFile(videosFile, 'utf8'));
+    const videosWatchedCounts = videosData.impressions_history_videos_watched.reduce((counts, video) => {
+        const author = video.string_map_data.Author ? video.string_map_data.Author.value : 'Unknown';
+        counts[author] = (counts[author] || 0) + 1;
+    return counts;
+    }, {});
+    const videoTimespan = getTimespan(videosData.impressions_history_videos_watched);
     res.render('ads_information/ads_and_topics/videos_watched', { videosWatchedCounts, videoTimespan });
 });
 
 // Route to display followers
-app.get('/followers', (req, res) => {
+app.get('/followers', async (req, res) => {
+    const followersFile = path.join(connectionsDirectoryPath, 'followers_1.json');
+    const followersData = JSON.parse(await fs.readFile(followersFile, 'utf8'));
+    const followersList = followersData.map(follower => ({
+        link: follower.string_list_data[0].href || 'Link n/a',
+        username: follower.string_list_data[0].value || 'User n/a',
+        time: follower.string_list_data[0].timestamp ? new Date(follower.string_list_data[0].timestamp * 1000).toLocaleString() : 'Unknown Time'
+    }));
     res.render('connections/followers', { followersList });
 });
 
-// Route to display followers
-app.get('/following', (req, res) => {
+// Route to display following
+app.get('/following', async (req, res) => {
+    const followingFile = path.join(connectionsDirectoryPath, 'following.json');
+    const followingData = JSON.parse(await fs.readFile(followingFile, 'utf8'));
+    const followingList = followingData.relationships_following.map(following => ({
+        link: following.string_list_data[0].href || 'Link n/a',
+        username: following.string_list_data[0].value || 'User n/a',
+        time: following.string_list_data[0].timestamp ? new Date(following.string_list_data[0].timestamp * 1000).toLocaleString() : 'Unknown Time'
+    }));
     res.render('connections/following', { followingList });
 });
 
-// Pass the list to the EJS template
-app.get('/link_history', (req, res) => {
-    const loggedInformation = path.join(linkHistoryDirectory, 'link_history.json');
-    const loggedInformationData = JSON.parse(fs.readFileSync(loggedInformation, 'utf8'));
-
-    const loggedInformationList = loggedInformationData.map(log => {
+// Route to display link history
+app.get('/link_history', async (req, res) => {
+    const linkHistoryFile = path.join(linkHistoryDirectory, 'link_history.json');
+    const linkHistoryData = JSON.parse(await fs.readFile(linkHistoryFile, 'utf8'));
+    const loggedInformationList = linkHistoryData.map(log => {
         const pageUrl = log.label_values.find(item => item.ent_field_name === 'PageURL')?.value || 'N/A';
         const pageTitle = log.label_values.find(item => item.ent_field_name === 'PageTitle')?.value || 'N/A';
         const startTime = log.label_values.find(item => item.ent_field_name === 'StartTime')?.value || 'Unknown Time';
         const endTime = log.label_values.find(item => item.ent_field_name === 'EndTime')?.value || 'Unknown Time';
-        return {
-            pageUrl,
-            pageTitle,
-            startTime,
-            endTime,
-        };
+        return { pageUrl, pageTitle, startTime, endTime };
     });
-
     res.render('link_history/link_history', { loggedInformationList });
 });
 
-
-
-
-app.get('/comments', (req, res) => {
-    const comments = path.join(activityDirectory, 'comments', 'post_comments_1.json');
-    const commentsData = JSON.parse(fs.readFileSync(comments, 'utf8'));
-
-    const commentsList = commentsData.map(comment => {
-        const commentText = decodeURIComponent(escape(comment.string_map_data.Comment?.value || 'No Comment'));
-        const mediaOwner = decodeURIComponent(escape(comment.string_map_data?.['Media Owner']?.value || 'Unknown Owner'));
-        const timestamp = comment.string_map_data.Time.timestamp || null;
-        const formattedTime = timestamp ? new Date(timestamp * 1000).toLocaleString() : 'Unknown Time';
-        return {
-            comment: commentText,
-            mediaOwner,
-            time: formattedTime
-        };
-    });
-
+// Route to display comments
+app.get('/comments', async (req, res) => {
+    const commentsFile = path.join(activityDirectory, 'comments', 'post_comments_1.json');
+    const commentsData = JSON.parse(await fs.readFile(commentsFile, 'utf8'));
+    const commentsList = commentsData.map(comment => ({
+        comment: decodeURIComponent(escape(comment.string_map_data.Comment?.value || 'No Comment')),
+        mediaOwner: decodeURIComponent(escape(comment.string_map_data?.['Media Owner']?.value || 'Unknown Owner')),
+        time: comment.string_map_data.Time.timestamp ? new Date(comment.string_map_data.Time.timestamp * 1000).toLocaleString() : 'Unknown Time'
+    }));
     const totalComments = commentsList.length;
     res.render('activity/comments', { totalComments, commentsList });
 });
 
-app.get('/reel_comments', (req, res) => {
-    const comments = path.join(activityDirectory, 'comments', 'reels_comments.json');
-    const commentsData = JSON.parse(fs.readFileSync(comments, 'utf8'));
-
-    const commentsList = commentsData.comments_reels_comments.map(comment => {
-        const commentText = decodeURIComponent(escape(comment.string_map_data.Comment?.value || 'No Comment'));
-        const mediaOwner = decodeURIComponent(escape(comment.string_map_data?.['Media Owner']?.value || 'Unknown Owner'));
-        const timestamp = comment.string_map_data.Time.timestamp || null;
-        const formattedTime = timestamp ? new Date(timestamp * 1000).toLocaleString() : 'Unknown Time';
-        return {
-            comment: commentText,
-            mediaOwner,
-            time: formattedTime
-        };
-    });
-
+// Route to display reel comments
+app.get('/reel_comments', async (req, res) => {
+    const commentsFile = path.join(activityDirectory, 'comments', 'reels_comments.json');
+    const commentsData = JSON.parse(await fs.readFile(commentsFile, 'utf8'));
+    const commentsList = commentsData.comments_reels_comments.map(comment => ({
+        comment: decodeURIComponent(escape(comment.string_map_data.Comment?.value || 'No Comment')),
+        mediaOwner: decodeURIComponent(escape(comment.string_map_data?.['Media Owner']?.value || 'Unknown Owner')),
+        time: comment.string_map_data.Time.timestamp ? new Date(comment.string_map_data.Time.timestamp * 1000).toLocaleString() : 'Unknown Time'
+    }));
     const totalComments = commentsList.length;
     res.render('activity/comments', { totalComments, commentsList });
 });
 
-app.get('/liked_posts', (req, res) => {
-    // Define the path to the liked posts JSON file
-    const likes = path.join(activityDirectory, 'likes', 'liked_posts.json');
-
-    // Read and parse the JSON file
-    const likesData = JSON.parse(fs.readFileSync(likes, 'utf8'));
-
-    // Organize likes by title and collect the associated URLs
+// Route to display liked posts
+app.get('/liked_posts', async (req, res) => {
+    const likesFile = path.join(activityDirectory, 'likes', 'liked_posts.json');
+    const likesData = JSON.parse(await fs.readFile(likesFile, 'utf8'));
     const organizedLikes = {};
-
     likesData.likes_media_likes.forEach(like => {
-        const title = like.title || 'Untitled'; // Default to 'Untitled' if no title exists
-        const hrefs = like.string_list_data.map(data => data.href); // Extract the href URLs
-
+        const title = like.title || 'Untitled';
+        const hrefs = like.string_list_data.map(data => data.href);
         if (!organizedLikes[title]) {
             organizedLikes[title] = [];
         }
-
-        organizedLikes[title].push(...hrefs); // Add the URLs to the array for this title
+        organizedLikes[title].push(...hrefs);
     });
     const likedCount = likesData.likes_media_likes.length;
-    // Render the EJS template, passing the organized likes
-    res.render('activity/liked_posts', { likedCount,organizedLikes });
+    res.render('activity/liked_posts', { likedCount, organizedLikes });
 });
 
-
-app.get('/liked_comments', (req, res) => {
-    // Define the path to the liked posts JSON file
-    const likes = path.join(activityDirectory, 'likes', 'liked_comments.json');
-
-    // Read and parse the JSON file
-    const likesData = JSON.parse(fs.readFileSync(likes, 'utf8'));
-
-    // Organize likes by title and collect the associated URLs
+// Route to display liked comments
+app.get('/liked_comments', async (req, res) => {
+    const likesFile = path.join(activityDirectory, 'likes', 'liked_comments.json');
+    const likesData = JSON.parse(await fs.readFile(likesFile, 'utf8'));
     const organizedLikes = {};
-
     likesData.likes_comment_likes.forEach(like => {
-        const title = like.title || 'Untitled'; // Default to 'Untitled' if no title exists
-        const hrefs = like.string_list_data.map(data => data.href); // Extract the href URLs
-
+        const title = like.title || 'Untitled';
+        const hrefs = like.string_list_data.map(data => data.href);
         if (!organizedLikes[title]) {
             organizedLikes[title] = [];
         }
-
-        organizedLikes[title].push(...hrefs); // Add the URLs to the array for this title
+        organizedLikes[title].push(...hrefs);
     });
     const likedCount = likesData.likes_comment_likes.length;
-    res.render('activity/liked_comments', { likedCount,organizedLikes });
+    res.render('activity/liked_comments', { likedCount, organizedLikes });
 });
 
-// Route to display usernames
-app.get('/messages', (req, res) => {
+// Route to display messages
+app.get('/messages', async (req, res) => {
     const inboxDirectory = path.join(activityDirectory, 'messages', 'inbox');
-
-    // Get the list of directories (usernames)
-    const users = fs.readdirSync(inboxDirectory).filter(user => {
-        return fs.lstatSync(path.join(inboxDirectory, user)).isDirectory();
+    const users = (await fs.readdir(inboxDirectory)).filter(async (user) => {
+        return (await fs.stat(path.join(inboxDirectory, user))).isDirectory();
     });
     const count = users.length;
-    res.render('activity/messages', { count,users });
+    res.render('activity/messages', { count, users });
 });
 
-app.get('/messages/:username', (req, res) => {
+// Route to display specific message thread
+app.get('/messages/:username', async (req, res) => {
     const username = req.params.username;
     const messageFile = path.join(activityDirectory, 'messages', 'inbox', username, 'message_1.json');
-
-    if (fs.existsSync(messageFile)) {
-        const messageData = JSON.parse(fs.readFileSync(messageFile, 'utf8'));
-
-        // Decode emojis in content
+    try {
+        const messageData = JSON.parse(await fs.readFile(messageFile, 'utf8'));
         messageData.messages = messageData.messages.map(message => {
             if (message.content) {
                 message.content = decodeURIComponent(escape(message.content));
             }
             return message;
         });
-
-        res.render('activity/messages_thread', { 
-            user: messageData.participants[0].name, 
+        res.render('activity/messages_thread', {
+            user: messageData.participants[0].name,
             messages: messageData.messages,
-            
         });
-    } else {
+    } catch (err) {
         res.status(404).send('Message not found for user ' + username);
     }
 });
 
 // Route to display login activity with location info from IP address
 app.get('/login_activity', async (req, res) => {
-    const loginActivity = path.join(loginInformationDirectory, 'login_activity.json');
-    const loginActivityData = JSON.parse(fs.readFileSync(loginActivity, 'utf8'));
+    const loginActivityFile = path.join(loginInformationDirectory, 'login_activity.json');
+    const loginActivityData = JSON.parse(await fs.readFile(loginActivityFile, 'utf8'));
 
-    // Helper function to fetch location from IP using ipinfo
     const getLocationFromIP = async (ip) => {
         try {
             const response = await ipinfo(ip);
@@ -328,7 +271,6 @@ app.get('/login_activity', async (req, res) => {
         }
     };
 
-    // Map over the login activity data and enrich it with location information
     const loginActivityList = await Promise.all(
         loginActivityData.account_history_login_history.map(async (login) => {
             const device = login.string_map_data['User Agent']?.value || 'Unknown Device';
@@ -345,28 +287,25 @@ app.get('/login_activity', async (req, res) => {
         })
     );
 
-    // Render the login_activity.ejs template with the enriched data
     res.render('activity/login_activity', { loginActivityList });
 });
 
-// Route to display suggested accounts viewed
-app.get('advertisers_using_your_activity_or_information', (req, res) => {
-    const advertisers = path.join(instagramAdsDirectoryPath, 'advertisers_using_your_activity_or_information.json');
-    const advertisersData = JSON.parse(fs.readFileSync(advertisers, 'utf8'));
-    const advertisersList = advertisersData.ig_custom_audiences_all_types.map(advertiser => {
-        return {
-            name: advertiser.string_map_data.Name.value,
-            category: advertiser.string_map_data.Category.value,
-            time: new Date(advertiser.string_map_data.Time.timestamp * 1000).toLocaleString()
-        };
-    });
+// Route to display advertisers using your activity or information
+app.get('/advertisers_using_your_activity_or_information', async (req, res) => {
+    const advertisersFile = path.join(instagramAdsDirectoryPath, 'advertisers_using_your_activity_or_information.json');
+    const advertisersData = JSON.parse(await fs.readFile(advertisersFile, 'utf8'));
 
-    res.render('ads_information/instagram_ads_and_businesses/advertisers_using_your_activity_or_information', { advertisersList });
+    // Mapping advertisers to an array of relevant details
+    const advertisersList = advertisersData.ig_custom_audiences_all_types.map(advertiser => ({
+        name: advertiser.advertiser_name,
+        hasDataFileCustomAudience: advertiser.has_data_file_custom_audience,
+        hasRemarketingCustomAudience: advertiser.has_remarketing_custom_audience,
+        hasInPersonStoreVisit: advertiser.has_in_person_store_visit
+    }));
+
+    // Rendering the view with the list of advertisers
+    res.render('ads_information/ads_and_topics/advertisers_using_your_activity_or_information', { advertisersList });
 });
-
-
-
-
 
 // Start the server
 const PORT = process.env.PORT || 3000;
