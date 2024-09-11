@@ -1,5 +1,8 @@
 ## View Raw Instagram Data
 
+## Step 0
+Clone the knowyourig code repository (click green Code button -> download ZIP)
+
 ### Step 1
 Download your instagram data (all time, 1 year, etc): https://help.instagram.com/contact/505535973176353
 
