@@ -90,7 +90,7 @@ app.get('/', (req, res) => {
     const items = [
         { name: 'Ads Viewed', route: '/ads_viewed' },
         { name: 'Posts Viewed', route: '/posts_viewed' },
-        { name: 'Suggested Accounts Viewed', route: '/suggested_accounts_viewed' },
+        { name: 'Suggested Profiles Viewed', route: '/suggested_accounts_viewed' },
         { name: 'Watched Videos', route: '/videos_watched' },
         { name: 'Followers', route: '/followers' },
         { name: 'Following', route: '/following' },
@@ -119,6 +119,32 @@ app.get('/posts_viewed', (req, res) => {
     res.render('ads_information/ads_and_topics/posts_viewed', { postCounts, postTimespan });
 });
 
+// Route to display suggested accounts viewed
+app.get('/suggested_accounts_viewed', (req, res) => {
+    // Define both file paths
+    const suggestedProfilesView = path.join(adsAndTopicsDirectoryPath, 'suggested_profiles_viewed.json');
+    const suggestedAccountsView = path.join(adsAndTopicsDirectoryPath, 'suggested_accounts_viewed.json');
+
+    // Check which file exists and load the correct one
+    let fileToUse;
+    if (fs.existsSync(suggestedProfilesView)) {
+        fileToUse = suggestedProfilesView;
+    } else if (fs.existsSync(suggestedAccountsView)) {
+        fileToUse = suggestedAccountsView;
+    } else {
+        throw new Error('Neither suggested_profiles_viewed.json nor suggested_accounts_viewed.json found.');
+    }
+    const suggestedAccountsData = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
+    // Suggested accounts data processing (optional)
+    const suggestedAccountsList = suggestedAccountsData.impressions_history_chaining_seen.map(account => {
+        return {
+            username: account.string_map_data.Username ? account.string_map_data.Username.value : 'Unknown Username',
+            time: account.string_map_data.Time ? new Date(account.string_map_data.Time.timestamp * 1000).toLocaleString() : 'Unknown Time'
+        };
+    });
+
+    res.render('ads_information/ads_and_topics/suggested_accounts_viewed', { suggestedAccountsList });
+});
 
 // Route to display suggested accounts viewed
 app.get('/videos_watched', (req, res) => {
@@ -327,7 +353,6 @@ app.get('/login_activity', async (req, res) => {
 app.get('advertisers_using_your_activity_or_information', (req, res) => {
     const advertisers = path.join(instagramAdsDirectoryPath, 'advertisers_using_your_activity_or_information.json');
     const advertisersData = JSON.parse(fs.readFileSync(advertisers, 'utf8'));
-
     const advertisersList = advertisersData.ig_custom_audiences_all_types.map(advertiser => {
         return {
             name: advertiser.string_map_data.Name.value,
