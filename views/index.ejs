@@ -3,77 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>KnowYourIG</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f7f7f7;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        h1#title {
-            text-align: center;
-            color: #333;
-            font-size: 60px;
-            margin-top: 50px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 50px auto;
-            max-width: 600px;
-        }
-
-        li {
-            margin: 20px 0;
-        }
-
-        a {
-            text-decoration: none;
-            font-size: 24px;
-            color: #333;
-            display: block;
-            padding: 15px;
-            border-radius: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
-            text-align: center;
-        }
-
-        /* Gradient hover effect for Instagram-like colors */
-        a:hover {
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            color: #fff;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 600px) {
-            h1#title {
-                font-size: 40px;
-                margin-top: 30px;
-            }
-            a {
-                font-size: 20px;
-                padding: 10px;
-            }
-        }
-    </style>
 </head>
-<body>
-    <h1><a id="title" href="/"> KnowYourIG </a></h1>
-    <ul>
-        <% items.forEach(function(item) { %>
-            <li>
-                <a href="<%= item.route %>"><%= item.name %></a>
-            </li>
-        <% }); %>
-    </ul>
+<body class="bg-gray-100 text-gray-800">
+    <div class="flex flex-col items-center min-h-screen py-8">
+        <!-- Main Title -->
+        <h1 class="text-center text-gray-800 text-5xl lg:text-7xl uppercase tracking-widest my-12">
+            <a id="title" href="/" class="hover:underline">KnowYourIG</a>
+        </h1>
+        
+        <!-- List of Items -->
+        <ul class="list-none p-0 mx-auto w-full max-w-lg">
+            <% items.forEach(function(item) { %>
+                <li class="mb-5">
+                    <a href="<%= item.route %>" class="block text-lg lg:text-xl text-center px-5 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-md transition-all duration-300 ease-in-out hover:bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 hover:text-white hover:shadow-xl">
+                        <%= item.name %>
+                    </a>
+                </li>
+            <% }); %>
+        </ul>
+
+        <!-- File Upload Section -->
+        <div class="mt-12">
+            <h1 class="text-3xl lg:text-5xl text-gray-800 mb-6">Upload Your Instagram Data</h1>
+
+            <!-- Folder Upload Input -->
+            <input type="file" id="folderInput" class="p-3 border border-gray-300 rounded-lg shadow-sm" webkitdirectory mozdirectory directory multiple />
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('folderInput').addEventListener('change', handleFiles);
+
+        function handleFiles(event) {
+            const files = event.target.files;
+            const fileMap = {};
+            
+            // Loop through all files in the folder and store them in an object
+            for (const file of files) {
+                const relativePath = file.webkitRelativePath || file.mozRelativePath || file.relativePath || file.name;
+                fileMap[relativePath] = file;
+            }
+
+            // Process the files (e.g., find the message_1.json)
+            processFiles(fileMap);
+        }
+
+        function processFiles(fileMap) {
+            // Example: Access a specific file like message_1.json
+            const messageFile = fileMap['your_instagram_activity/messages/inbox/user/message_1.json'];
+            
+            if (messageFile) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const jsonData = JSON.parse(event.target.result);
+                    console.log(jsonData); // Here you can process the JSON data
+                };
+                reader.readAsText(messageFile);
+            } else {
+                alert('Message file not found!');
+            }
+        }
+    </script>
 </body>
 </html>
