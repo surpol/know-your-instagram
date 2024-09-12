@@ -50,7 +50,7 @@ router.get('/suggested_accounts_viewed', async (req, res) => {
     res.render('ads_information/ads_and_topics/suggested_accounts_viewed', { suggestedAccountsList });
 });
 
-const instagramAdsDirectoryPath = path.join(__dirname, 'data', 'ads_information', 'instagram_ads_and_businesses');
+const instagramAdsDirectoryPath = path.join(__dirname, '../data', 'ads_information', 'instagram_ads_and_businesses');
 
 // Route to display advertisers using your activity or information
 router.get('/advertisers', async (req, res) => {
