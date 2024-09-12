@@ -4,117 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages for <%= user %></title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-top: 20px;
-            font-size: 28px;
-        }
-
-        h1:first-of-type {
-            margin-bottom: 10px;
-            font-weight: normal;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .message {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .message:hover {
-            transform: translateY(-3px);
-        }
-
-        .message p {
-            margin: 0;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .message strong {
-            color: #007bff;
-        }
-
-        .timestamp {
-            font-size: 12px;
-            color: #888;
-            margin-top: 10px;
-            text-align: right;
-        }
-
-        .no-messages {
-            text-align: center;
-            font-size: 18px;
-            color: #888;
-            margin-top: 50px;
-        }
-
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            text-align: center;
-            text-decoration: none;
-            color: #007bff;
-            font-size: 16px;
-            transition: color 0.3s ease;
-        }
-
-        a:hover {
-            color: #0056b3;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-
-            .message {
-                padding: 15px;
-            }
-
-            h1 {
-                font-size: 22px;
-            }
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800">
 
-    <div class="container">
-        <h1><%= user %></h1>
-        <h1>Total Messages: <%= messages.length %></h1>
-        <a href="/messages">← Back to Users</a>
+    <div class="container mx-auto max-w-3xl py-8 px-4">
+        <h1 class="text-center text-2xl lg:text-3xl font-semibold text-gray-800 mb-4"><%= user %></h1>
+        <h1 class="text-center text-xl lg:text-2xl text-gray-600 mb-6">Total Messages: <%= messages.length %></h1>
+        <div class="flex justify-center mb-6">
+            <a href="/messages" class="text-blue-500 hover:text-blue-700 transition-colors">← Back to Users</a>
+        </div>
+        
         <% if (messages && messages.length > 0) { %>
             <% messages.forEach(function(message) { %>
-                <div class="message">
-                    <p><strong><%= message.sender_name %>:</strong> <%= message.content || 'No content available' %></p>
-                    <p class="timestamp"><%= new Date(message.timestamp_ms).toLocaleString() %></p>
+                <div class="message bg-white rounded-lg p-6 mb-6 shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1">
+                    <p class="text-lg font-semibold text-gray-800 mb-2"><strong><%= message.sender_name %>:</strong></p>
+                    <p class="text-base text-gray-600"><%= message.content || 'No content available' %></p>
+                    <p class="timestamp text-right text-sm text-gray-500 mt-4"><%= new Date(message.timestamp_ms).toLocaleString() %></p>
                 </div>
             <% }); %>
         <% } else { %>
-            <p class="no-messages">No messages found.</p>
+            <p class="no-messages text-center text-lg text-gray-500 mt-10">No messages found.</p>
         <% } %>
-
     </div>
 
 </body>
