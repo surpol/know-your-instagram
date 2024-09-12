@@ -4,112 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Messages</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f7f7f7;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 36px;
-            color: #4CAF50;
-            margin-bottom: 30px;
-        }
-
-        p {
-            font-size: 16px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        table {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        td {
-            border-bottom: 1px solid #ddd;
-            font-size: 14px;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        a {
-            color: #4CAF50;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .back-button {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 600px) {
-            th, td {
-                font-size: 12px;
-                padding: 10px;
-            }
-
-            h1 {
-                font-size: 28px;
-            }
-        }
-
-        /* Add border between rows */
-        tr + tr {
-            border-top: 1px solid #ccc;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Messages: <%= count %></h1>
-    <div class="back-button">
-        <a href="/">← Back to main</a>
+<body class="bg-gray-100 text-gray-800 p-6">
+    <!-- Title -->
+    <h1 class="text-center text-3xl lg:text-4xl font-semibold text-green-600 mb-8">
+        Messages: <%= count %>
+    </h1>
+
+    <!-- Back Button -->
+    <div class="flex justify-center mb-6">
+        <a href="/" class="text-green-600 hover:underline text-lg">← Back to main</a>
     </div>
-    <table>
+
+    <!-- Table for Messages -->
+    <table class="w-full max-w-4xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
         <tbody>
             <!-- Loop through users and display each in a separate row -->
             <% users.forEach(function(user) { %>
-            <tr>
-                <td><h2><a href="/messages/<%= user %>"><%= user %></a></h2></td>
+            <tr class="border-t border-gray-200 hover:bg-gray-100">
+                <td class="p-4">
+                    <h2 class="text-xl font-semibold">
+                        <a href="/messages/<%= user %>" class="text-green-600 hover:underline">
+                            <%= user %>
+                        </a>
+                    </h2>
+                </td>
             </tr>
             <% }); %>
         </tbody>
     </table>
 
     <script>
-
-        
+        // Add any JavaScript logic here if needed
     </script>
 </body>
 </html>
