@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 // Route to display specific message thread
 router.get('/:username', async (req, res) => {
     const username = req.params.username;
-    const messageFile = path.join(activityDirectory, 'messages', 'inbox', username, 'message_1.json');
+    const messageFile = path.join(activityDirectory, username, 'message_1.json');
     try {
         const messageData = JSON.parse(await fs.readFile(messageFile, 'utf8'));
         messageData.messages = messageData.messages.map(message => {
