@@ -23,17 +23,17 @@ app.use('/security', securityRoutes);
 // Home route
 app.get('/', (req, res) => {
     const items = [
-        { name: 'Viewed Ads', route: '/ads/viewed' },
-        { name: 'Viewed Posts', route: '/ads/posts_viewed' },
-        { name: 'Viewed Suggested Accounts', route: '/ads/suggested_accounts_viewed' },
+        { name: 'Messages', route: '/messages' },
+        { name: 'Seen Ads', route: '/ads/viewed' },
+        { name: 'Seen Posts', route: '/ads/posts_viewed' },
+        { name: 'Viewed suggested accounts', route: '/ads/suggested_accounts_viewed' },
         { name: 'Watched Videos', route: '/ads/videos_watched' },
         { name: 'Followers', route: '/connections/followers' },
         { name: 'Following', route: '/connections/following' },
         //{ name: 'Viewed Web Links', route: '/activity/link_history' },
         { name: 'Posted Comments', route: '/activity/comments' },
-        { name: 'Instant Messaging Log', route: '/messages' },
         { name: 'Login Activity', route: '/security/login_activity' },
-        { name: 'Your Advertisers', route: '/ads/advertisers' }
+        { name: 'Advertisers', route: '/ads/advertisers' }
     ];
 
     res.render('index', { items });
