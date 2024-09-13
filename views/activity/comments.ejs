@@ -4,174 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post Comments</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            padding: 20px;
-        }
-
-        h1 {
-            font-size: 24px;
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-        }
-
-        a {
-            display: block;
-            text-align: center;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #007bff;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .comments-container {
-            max-width: 1200px;
-            width: 100%;
-        }
-
-        /* Grid layout for the comments */
-        .comments-grid {
-            display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 20px;
-        }
-
-        /* For medium screens (e.g., tablets) */
-        @media (min-width: 768px) {
-            .comments-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* For large screens (e.g., desktops) */
-        @media (min-width: 1024px) {
-            .comments-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .comment-card {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.4s forwards;
-        }
-
-        .comment-card img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 15px;
-        }
-
-        .comment-content {
-            flex: 1;
-        }
-
-        .comment-content h4 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .comment-content h4 a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .comment-content h4 a:hover {
-            text-decoration: underline;
-        }
-
-        .comment-content p {
-            margin: 10px 0;
-            font-size: 15px;
-            color: #555;
-        }
-
-        .comment-content .time {
-            font-size: 12px;
-            color: #888;
-            margin-top: 5px;
-        }
-
-        /* Fade-in animation */
-        @keyframes fadeInUp {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Hover effect for cards */
-        .comment-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Mobile responsiveness */
-        @media (max-width: 600px) {
-            .comment-card {
-                padding: 15px;
-            }
-
-            .comment-card img {
-                width: 40px;
-                height: 40px;
-            }
-
-            .comment-content h4 {
-                font-size: 14px;
-            }
-
-            .comment-content p {
-                font-size: 13px;
-            }
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="min-h-screen bg-gray-100 flex flex-col items-center p-5">
 
-    <div class="comments-container">
-        <h1>COMMENTS: <%= totalComments %></h1>
-        <a href="/">← Back to main</a>
+    <div class="comments-container w-full max-w-6xl">
+        <h1 class="text-2xl text-gray-800 text-center mb-8">COMMENTS: <%= totalComments %></h1>
+        <a href="/" class="text-blue-500 text-center block mb-6 hover:underline">← Back to main</a>
 
         <!-- Comments grid to display each comment in a grid layout -->
-        <div class="comments-grid">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <% commentsList.forEach(function(comment) { %>
-                <div class="comment-card">
+                <div class="comment-card bg-white p-5 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
                     <div class="comment-content">
                         <!-- Create a clickable link to the media owner's Instagram page -->
-                        <h4>
-                            <a href="https://www.instagram.com/<%= comment.mediaOwner %>" target="_blank">
+                        <h4 class="font-bold text-lg mb-2">
+                            <a href="https://www.instagram.com/<%= comment.mediaOwner %>" target="_blank" class="text-blue-500 hover:underline">
                                 to: <%= comment.mediaOwner %>
                             </a>
                         </h4>
-                        <p><%= comment.comment %></p>
-                        <div class="comment-actions">
-                            <span class="time"><%= comment.time %></span>
+                        <p class="text-gray-600 mb-4"><%= comment.comment %></p>
+                        <div class="text-right">
+                            <span class="text-xs text-gray-500"><%= comment.time %></span>
                         </div>
                     </div>
                 </div>
