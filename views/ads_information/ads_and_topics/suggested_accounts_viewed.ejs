@@ -4,104 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suggested Accounts Viewed</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 36px;
-            color: #7e79d7;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .timeline {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-
-        .timeline-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .timeline-date {
-            font-weight: bold;
-            color: #333;
-        }
-
-        a {
-            color: #7e79d7;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .filter-container,
-        .sort-container {
-            margin-bottom: 20px;
-        }
-
-        select,
-        input {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #7e79d7;
-            background-color: #f7f7f7;
-            color: #333;
-            margin-right: 10px;
-        }
-
-        button {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #7e79d7;
-            background-color: #7e79d7;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #5e5bb5;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Suggested Accounts Viewed</h1>
+<body class="flex flex-col justify-center items-center min-h-screen bg-gray-100 p-5">
+
+    <h1 class="text-4xl font-semibold text-purple-600 mb-8 uppercase tracking-wider text-center">Suggested Accounts Viewed</h1>
 
     <!-- Date Range Filter Inputs -->
-    <div class="filter-container">
-        <label for="startDate">Start Date: </label>
-        <input type="date" id="startDate">
-        <label for="endDate">End Date: </label>
-        <input type="date" id="endDate">
-        <button onclick="filterByDate()">Filter</button>
+    <div class="filter-container flex items-center mb-6">
+        <label for="startDate" class="mr-3 text-lg font-medium">Start Date: </label>
+        <input type="date" id="startDate" class="border border-purple-500 rounded-lg p-2 text-gray-700 mr-4 focus:outline-none focus:ring-2 focus:ring-purple-600">
+        <label for="endDate" class="mr-3 text-lg font-medium">End Date: </label>
+        <input type="date" id="endDate" class="border border-purple-500 rounded-lg p-2 text-gray-700 mr-4 focus:outline-none focus:ring-2 focus:ring-purple-600">
+        <button onclick="filterByDate()" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-500 transition duration-300">Filter</button>
     </div>
 
     <!-- Sorting dropdown -->
-    <div class="sort-container">
-        <label for="sort">Sort by: </label>
-        <select id="sort" onchange="sortTimeline()">
+    <div class="sort-container mb-8">
+        <label for="sort" class="mr-3 text-lg font-medium">Sort by: </label>
+        <select id="sort" onchange="sortTimeline()" class="border border-purple-500 rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-600">
             <option value="default">Default</option>
             <option value="dateAsc"> Ascending</option>
             <option value="dateDesc">Descending</option>
@@ -110,7 +31,7 @@
     </div>
 
     <!-- Timeline View -->
-    <div id="timelineView" class="timeline"></div>
+    <div id="timelineView" class="w-full max-w-lg mx-auto p-4 space-y-4 bg-white rounded-lg shadow-md"></div>
 
     <script>
         const suggestedAccountsList = <%- JSON.stringify(suggestedAccountsList) %>;
@@ -123,17 +44,17 @@
             timelineView.innerHTML = ''; // Clear existing timeline
 
             if (list.length === 0) {
-                timelineView.innerHTML = '<p>No accounts viewed in the selected date range.</p>';
+                timelineView.innerHTML = '<p class="text-center text-gray-600">No accounts viewed in the selected date range.</p>';
                 return;
             }
 
             list.forEach(account => {
                 if (account.time !== 'Unknown Time') {
                     const timelineItem = document.createElement('div');
-                    timelineItem.classList.add('timeline-item');
+                    timelineItem.classList.add('timeline-item', 'flex', 'justify-between', 'bg-gray-50', 'p-4', 'rounded-lg', 'shadow-sm', 'hover:shadow-md', 'transition', 'duration-300', 'ease-in-out');
                     timelineItem.innerHTML = `
-                        <div class="timeline-date">${new Date(account.time).toLocaleString()}</div>
-                        <div class="timeline-content"><a href="https://www.instagram.com/${account.username}" target="_blank">${account.username}</a></div>
+                        <div class="timeline-date font-bold text-gray-700">${new Date(account.time).toLocaleString()}</div>
+                        <div class="timeline-content"><a href="https://www.instagram.com/${account.username}" target="_blank" class="text-purple-600 hover:underline font-bold">${account.username}</a></div>
                     `;
                     timelineView.appendChild(timelineItem);
                 }
