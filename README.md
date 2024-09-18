@@ -11,7 +11,7 @@ Download your instagram data (all time, 1 year, etc): https://help.instagram.com
 2. Keep this folder in the project's root directory
 
 ### Step 3
-run cmd ```npm install``` to install dependencies in packages.json
+run cmd ```npm install``` to install dependencies in packages.json\n
 run cmd ```nodemon app``` to run application
 
 ### Step 4
