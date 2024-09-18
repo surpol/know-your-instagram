@@ -1,4 +1,4 @@
-## View Raw Instagram Data
+## View Raw Instagram Data (offline)
 
 ### Step 0
 Clone the knowyourig code repository (click green Code button -> download ZIP)
